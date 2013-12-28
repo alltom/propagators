@@ -1,0 +1,64 @@
+// 2013-12-28
+// (revisited in Jamaica after having read it sometime fall semester?)
+
+// http://groups.csail.mit.edu/mac/users/gjs/propagators/
+
+// python: https://github.com/lucastx/propagator.py
+
+Porcelain:
+	a = cell();
+	b = cell();
+	addContent(a, 3);
+	addContent(b, 2);
+	answer = cellExpression(add, a, b);
+	run();
+	console.log(answer.content());
+
+/*
+(d@ propagator boundary-cell ...)
+diagramApply(cell, ...)
+	Attaches a propagator to the given boundary cells. By convention, cells used
+	as outputs go last. As a Scheme procedure, d@ does not return a useful value.
+
+(e@ propagator boundary-cell ...)
+output = expressionApply(cell, ...)
+	Attaches the given propagator to a boundary consisting of the given boundary
+	cells augmented with an additional, synthesized cell. The synthesized cell
+	goes last, because that is the conventional position for an output cell.
+	Returns the synthesized cell as the Scheme return value of e@.
+
+This:
+	(define-cell x)  
+	(define-cell y)  
+	(define-cell z)  
+	(d@ p:* x y z)
+is equivalent to this:
+	(define-cell x)  
+	(define-cell y)  
+	(define-cell z (e@ p:* x y))
+
+deposit/examine propagators
+	put one cell into another cell
+
+p:when
+	takes an input cell and propagates only when it's true
+(TODO: I don't understand conditionals or recursion yet)
+
+makeInterval(3, 5) -> cell
+intervalLow(interval) -> low value
+intervalHigh(interval) -> high value
+isInterval(thing) -> bool
+
+Partial Information Structures:
+	equivalent? - used to tell whether a cell has changed
+	merge - "What do I need to do to the network in order to make it reflect the discovery that these two information structures are about the same object?"
+		Record: that object is best described by this information structure
+		These two information structures cannot describe the same object.
+		Record this information structure and connect these two cells with synchronizing propagators
+	contradictory?
+
+premise
+worldView is a collection of believed premises
+contingency - information that the given info is contingent on the given list of premises
+truthManagementSystem([contingency]) - seems really important, but I don't get it yet
+*/
