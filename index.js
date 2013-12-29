@@ -111,15 +111,15 @@ function Scheduler() {
 	return self;
 
 	function makeDefaultPropagators() {
-		self.pId = functionCallPropagator(requireAll(function (a) { return a }));
-		self.pNot = functionCallPropagator(requireAll(function (a) { return !a }));
-		self.pAdd = functionCallPropagator(requireAll(function (a, b) { return a + b }));
-		self.pSubtract = functionCallPropagator(requireAll(function (a, b) { return a - b }));
-		self.pMultiply = functionCallPropagator(requireAll(function (a, b) { return a * b }));
-		self.pDivide = functionCallPropagator(requireAll(function (a, b) { return a / b }));
+		self.pId = functionCallPropagator(function (a) { return a }, true);
+		self.pNot = functionCallPropagator(function (a) { return !a }, true);
+		self.pAdd = functionCallPropagator(function (a, b) { return a + b }, true);
+		self.pSubtract = functionCallPropagator(function (a, b) { return a - b }, true);
+		self.pMultiply = functionCallPropagator(function (a, b) { return a * b }, true);
+		self.pDivide = functionCallPropagator(function (a, b) { return a / b }, true);
 		self.pSwitch = functionCallPropagator(function (control, input) { if (control !== nothing && control) { return input } else { return nothing } });
 		self.pConditional = functionCallPropagator(function (control, consequent, alternate) { if (control !== nothing) { if (control) { return consequent } else { return alternate } } else { return nothing } });
-		self.pGet = functionCallPropagator(requireAll(function (object, property) { return object[property] }));
+		self.pGet = functionCallPropagator(function (object, property) { return object[property] }, true);
 		// TODO: pConditionalRouter
 		// TODO: pDeposit
 		// TODO: pExamine
@@ -158,30 +158,23 @@ function Scheduler() {
 			scheduler.diagramApply(scheduler.cMultiply, [cells[1], cells[2], cells[0]]);
 		});
 
-		// wraps f, only invoking it if no provided arguments are undefined
-		function requireAll(f) {
-			return function () {
-				if (_.all(arguments, function (value) { return value != undefined })) {
-					return f.apply(this, arguments);
-				}
-			};
-		}
-
 		// creates a cell containing a propagator that behaves like a function
 		// call: outputCell <- f(inputCell, ...)
-		function functionCallPropagator(f) {
+		function functionCallPropagator(f, strict) {
 			return self.Cell(function (scheduler, cells) {
 				var inputs = cells.slice(0, cells.length - 1);
 				var output = cells[cells.length - 1];
 				scheduler.addPropagator(inputs, toDo);
 
 				function toDo() {
-					var answer = f.apply(undefined, _.map(inputs, getContent));
-					output.addContent(answer);
+					var inputContent = _.map(inputs, function (cell) { return cell.content() });
 
-					function getContent(cell) {
-						return cell.content();
+					if (strict && _.contains(inputContent, nothing)) {
+						return;
 					}
+
+					var answer = f.apply(undefined, inputContent);
+					output.addContent(answer);
 				}
 			});
 		}
