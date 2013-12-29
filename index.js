@@ -1,7 +1,7 @@
 var _ = require("underscore");
 
 function Scheduler() {
-	var self = {};
+	var self = {}, scheduler = self;
 	var propagatorsEverAlerted = [];
 	var alertedPropagators = [];
 
@@ -18,13 +18,6 @@ function Scheduler() {
 		alertPropagators(propagatorsEverAlerted);
 	};
 
-	self.addPropagator = function (neighbors, toDo) {
-		_.each(neighbors, function (cell) {
-			cell.addNeighbor(toDo);
-		});
-		self.alertPropagator(toDo);
-	}
-
 	self.run = function () {
 		var ticks = 0;
 		while (alertedPropagators.length > 0) {
@@ -34,6 +27,57 @@ function Scheduler() {
 		return ticks;
 	};
 
+	// content is optional
+	self.Cell = function (content) {
+		var self = {};
+		var neighbors = [];
+		var content = content;
+
+		self.content = function () {
+			return content;
+		};
+
+		self.addContent = function (increment) {
+			var answer = merge(content, increment);
+
+			if (!equivalent(content, answer)) {
+				content = answer;
+				scheduler.alertPropagators(neighbors);
+			}
+		};
+
+		self.addNeighbor = function (neighbor) {
+			neighbors = _.union(neighbors, [neighbor]);
+			scheduler.alertPropagator(neighbor);
+		};
+
+		return self;
+	}
+
+	self.addPropagator = function (neighbors, toDo) {
+		_.each(neighbors, function (cell) {
+			cell.addNeighbor(toDo);
+		});
+		self.alertPropagator(toDo);
+	}
+
+	self.addCompoundPropagator = function (neighbors, toBuild) {
+		var done = false;
+		self.addPropagator(neighbors, toDo);
+
+		function toDo() {
+			if (!done) {
+				if (_.any(neighbors, getContent)) {
+					done = true;
+					toBuild();
+				}
+			}
+
+			function getContent(cell) {
+				return cell.content();
+			}
+		}
+	}
 
 	// (d@ propagator boundary-cell ...)
 	// propagator is a cell containing a propagator constructor for attaching propagators
@@ -57,42 +101,9 @@ function Scheduler() {
 		return output;
 	};
 
-	makeCellConstructor();
 	makeDefaultPropagators();
 
 	return self;
-
-	// content is optional
-	function makeCellConstructor() {
-		var scheduler = self;
-		self.Cell = Cell;
-
-		function Cell(content) {
-			var self = {};
-			var neighbors = [];
-			var content = content;
-
-			self.content = function () {
-				return content;
-			};
-
-			self.addContent = function (increment) {
-				var answer = merge(content, increment);
-
-				if (!equivalent(content, answer)) {
-					content = answer;
-					scheduler.alertPropagators(neighbors);
-				}
-			};
-
-			self.addNeighbor = function (neighbor) {
-				neighbors = _.union(neighbors, [neighbor]);
-				scheduler.alertPropagator(neighbor);
-			};
-
-			return self;
-		}
-	}
 
 	function makeDefaultPropagators() {
 		self.pId = functionCallPropagator(requireAll(function (a) { return a }));
@@ -141,6 +152,7 @@ function Scheduler() {
 			scheduler.diagramApply(scheduler.cMultiply, [cells[1], cells[2], cells[0]]);
 		});
 
+		// wraps f, only invoking it if no provided arguments are undefined
 		function requireAll(f) {
 			return function () {
 				if (_.all(arguments, function (value) { return value != undefined })) {
@@ -149,6 +161,8 @@ function Scheduler() {
 			};
 		}
 
+		// creates a cell containing a propagator that behaves like a function
+		// call: outputCell <- f(inputCell, ...)
 		function functionCallPropagator(f) {
 			return self.Cell(function (scheduler, cells) {
 				var inputs = cells.slice(0, cells.length - 1);
@@ -167,24 +181,6 @@ function Scheduler() {
 		}
 	}
 }
-
-// function addCompoundPropagator(scheduler, neighbors, toBuild) {
-// 	var done = false;
-// 	scheduler.addPropagator(neighbors, toDo);
-
-// 	function toDo() {
-// 		if (!done) {
-// 			if (_.any(neighbors, getContent)) {
-// 				done = true;
-// 				toBuild();
-// 			}
-// 		}
-
-// 		function getContent(cell) {
-// 			return cell.content();
-// 		}
-// 	}
-// }
 
 function merge(content, increment) {
 	if (increment == undefined) {
