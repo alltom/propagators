@@ -1,0 +1,21 @@
+{
+	"name" : "propagators",
+	"description" : "implementation of propagators http://groups.csail.mit.edu/mac/users/gjs/propagators/",
+	"license" : "MIT",
+	"author" : "Tom Lieber <tom@alltom.com>",
+	"version" : "0.0.1",
+	"main" : "./index",
+	"repository" : {
+		"type" : "git",
+		"url" : "https://github.com/alltom/propagators.git"
+	},
+	"dependencies" : {
+		"underscore" : "~1.5.2"
+	},
+	"devDependencies" : {
+		"tap" : "~0.4.6"
+	},
+	"scripts" : {
+		"test" : "tap test/test-*.js"
+	}
+}
