@@ -51,7 +51,7 @@ test('not', function (t) {
 	b = scheduler.Cell();
 	scheduler.diagramApply(scheduler.pNot, [a, b]);
 	scheduler.run();
-	t.equal(b.content(), undefined);
+	t.equal(b.content(), p.nothing);
 
 	// cNot forward
 
@@ -93,7 +93,7 @@ test('add', function (t) {
 	c = scheduler.Cell();
 	scheduler.diagramApply(scheduler.pAdd, [a, b, c]);
 	scheduler.run();
-	t.equal(c.content(), undefined);
+	t.equal(c.content(), p.nothing);
 
 	scheduler = p.Scheduler();
 	a = scheduler.Cell();
@@ -101,7 +101,7 @@ test('add', function (t) {
 	c = scheduler.Cell();
 	scheduler.diagramApply(scheduler.pAdd, [a, b, c]);
 	scheduler.run();
-	t.equal(c.content(), undefined);
+	t.equal(c.content(), p.nothing);
 
 	// cAdd forward
 
@@ -153,7 +153,7 @@ test('subtract', function (t) {
 	c = scheduler.Cell();
 	scheduler.diagramApply(scheduler.pSubtract, [a, b, c]);
 	scheduler.run();
-	t.equal(c.content(), undefined);
+	t.equal(c.content(), p.nothing);
 
 	scheduler = p.Scheduler();
 	a = scheduler.Cell();
@@ -161,7 +161,7 @@ test('subtract', function (t) {
 	c = scheduler.Cell();
 	scheduler.diagramApply(scheduler.pSubtract, [a, b, c]);
 	scheduler.run();
-	t.equal(c.content(), undefined);
+	t.equal(c.content(), p.nothing);
 
 	// cSubtract forward
 
@@ -213,7 +213,7 @@ test('multiply', function (t) {
 	c = scheduler.Cell();
 	scheduler.diagramApply(scheduler.pMultiply, [a, b, c]);
 	scheduler.run();
-	t.equal(c.content(), undefined);
+	t.equal(c.content(), p.nothing);
 
 	scheduler = p.Scheduler();
 	a = scheduler.Cell();
@@ -221,7 +221,7 @@ test('multiply', function (t) {
 	c = scheduler.Cell();
 	scheduler.diagramApply(scheduler.pMultiply, [a, b, c]);
 	scheduler.run();
-	t.equal(c.content(), undefined);
+	t.equal(c.content(), p.nothing);
 
 	// cMultiply forward
 
@@ -273,7 +273,7 @@ test('divide', function (t) {
 	c = scheduler.Cell();
 	scheduler.diagramApply(scheduler.pDivide, [a, b, c]);
 	scheduler.run();
-	t.equal(c.content(), undefined);
+	t.equal(c.content(), p.nothing);
 
 	scheduler = p.Scheduler();
 	a = scheduler.Cell();
@@ -281,7 +281,7 @@ test('divide', function (t) {
 	c = scheduler.Cell();
 	scheduler.diagramApply(scheduler.pDivide, [a, b, c]);
 	scheduler.run();
-	t.equal(c.content(), undefined);
+	t.equal(c.content(), p.nothing);
 
 	// cDivide forward
 
@@ -373,11 +373,11 @@ test('switch', function (t) {
 	scheduler.diagramApply(scheduler.pSwitch, [control, input, output]);
 
 	scheduler.run();
-	t.equal(output.content(), undefined);
+	t.equal(output.content(), p.nothing);
 
 	control.addContent(false);
 	scheduler.run();
-	t.equal(output.content(), undefined);
+	t.equal(output.content(), p.nothing);
 
 	control.addContent(true);
 	scheduler.run();
@@ -397,7 +397,7 @@ test('conditional', function (t) {
 	scheduler.diagramApply(scheduler.pConditional, [control, consequent, alternate, output]);
 
 	scheduler.run();
-	t.equal(output.content(), 2);
+	t.equal(output.content(), p.nothing);
 
 	control.addContent(true);
 	scheduler.run();
@@ -421,7 +421,7 @@ test('late-binding', function (t) {
 	scheduler.diagramApply(op, [a, b, answer]);
 
 	scheduler.run();
-	t.equal(answer.content(), undefined);
+	t.equal(answer.content(), p.nothing);
 
 	scheduler.diagramApply(scheduler.pId, [scheduler.pAdd, op]);
 	scheduler.run();

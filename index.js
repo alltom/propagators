@@ -1,5 +1,7 @@
 var _ = require("underscore");
 
+var nothing = {};
+
 function Scheduler() {
 	var self = {}, scheduler = self;
 	var propagatorsEverAlerted = [];
@@ -31,7 +33,10 @@ function Scheduler() {
 	self.Cell = function (content) {
 		var self = {};
 		var neighbors = [];
-		var content = content;
+
+		if (arguments.length === 0) {
+			content = nothing;
+		}
 
 		self.content = function () {
 			return content;
@@ -82,11 +87,11 @@ function Scheduler() {
 	// (d@ propagator boundary-cell ...)
 	// propagator is a cell containing a propagator constructor for attaching propagators
 	self.diagramApply = function (propagator, boundaryCells) {
-		if (propagator.content()) {
+		if (propagator.content() !== nothing) {
 			propagator.content()(self, boundaryCells);
 		} else {
 			self.addPropagator([propagator], function () {
-				if (propagator.content()) {
+				if (propagator.content() !== nothing) {
 					propagator.content()(self, boundaryCells);
 				}
 			});
@@ -112,8 +117,8 @@ function Scheduler() {
 		self.pSubtract = functionCallPropagator(requireAll(function (a, b) { return a - b }));
 		self.pMultiply = functionCallPropagator(requireAll(function (a, b) { return a * b }));
 		self.pDivide = functionCallPropagator(requireAll(function (a, b) { return a / b }));
-		self.pSwitch = functionCallPropagator(function (control, input) { if (control) return input });
-		self.pConditional = functionCallPropagator(function (control, consequent, alternate) { if (control) { return consequent } else { return alternate } });
+		self.pSwitch = functionCallPropagator(function (control, input) { if (control !== nothing && control) { return input } else { return nothing } });
+		self.pConditional = functionCallPropagator(function (control, consequent, alternate) { if (control !== nothing) { if (control) { return consequent } else { return alternate } } else { return nothing } });
 		self.pGet = functionCallPropagator(requireAll(function (object, property) { return object[property] }));
 		// TODO: pConditionalRouter
 		// TODO: pDeposit
@@ -184,11 +189,14 @@ function Scheduler() {
 }
 
 function merge(content, increment) {
-	if (increment == undefined) {
+	// "nothing" does not contribute to a merge
+	if (content === nothing) {
+		return increment;
+	} else if (increment === nothing) {
 		return content;
-	} else {
-		return increment; // TODO
 	}
+
+	return increment; // TODO
 }
 
 function equivalent(a, b) {
@@ -196,3 +204,4 @@ function equivalent(a, b) {
 }
 
 exports.Scheduler = Scheduler;
+exports.nothing = nothing;
