@@ -188,34 +188,58 @@ function Scheduler() {
 }
 
 function merge(content, increment) {
-	// "nothing" does not contribute to a merge
-	if (content === nothing) {
-		return increment;
-	} else if (increment === nothing) {
-		return content;
+	function left(a, b) { return a }
+	function right(a, b) { return b }
+	function mustEq(a, b) { return equivalent(a, b) ? b : contradiction }
+
+	var matchers = [
+		[hasType("number"), hasType("number"), mustEq],
+		[hasType("string"), hasType("string"), mustEq],
+		[hasType("boolean"), hasType("boolean"), mustEq],
+
+		[eq(nothing), anything, right],
+		[anything, eq(nothing), left],
+	];
+
+	// try the matchers in order
+	for (var i = 0; i < matchers.length; i++) {
+		var matcher = matchers[i];
+		if (matcher[0](content) && matcher[1](increment)) {
+			return matcher[2](content, increment);
+		}
 	}
 
-	// anything merged with a "contradiction" is a contradiction
-	if (content === contradiction || increment === contradiction) {
-		return contradiction;
-	}
-
-	// if the values are not equivalent, it is a contradiction
-	if (!equivalent(content, increment)) {
-		return contradiction;
-	}
-
-	return increment; // TODO
+	return contradiction;
 }
 
 function equivalent(a, b) {
-	// TODO: if problems arise from floating points, uncomment this check
-	// if (typeof a === 'number' && typeof b === 'number') {
-	// 	return Math.abs(a - b) < 0.00001; // XXX
-	// }
+	var matchers = [
+		[hasType("number"), hasType("number"), floatEq],
+	];
+
+	// try the matchers in order
+	for (var i = 0; i < matchers.length; i++) {
+		var matcher = matchers[i];
+		if (matcher[0](a) && matcher[1](b)) {
+			return matcher[2](a, b);
+		}
+	}
 
 	return a === b;
+
+	function floatEq(a, b) {
+		// TODO: if problems arise from floating points, uncomment this check
+		// if (typeof a === 'number' && typeof b === 'number') {
+		// 	return Math.abs(a - b) < 0.00001; // XXX
+		// }
+		return a === b;
+	}
 }
+
+// used for matchers
+function anything() { return function () { return true } }
+function eq(v) { return function(v2) { return v2 === v } }
+function hasType(t) { return function (v) { return typeof v === t } }
 
 // http://stackoverflow.com/questions/8458984/how-do-i-get-a-correct-backtrace-for-a-custom-error-class-in-nodejs
 function ContradictionError(oldValue, newValue) {
