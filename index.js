@@ -193,6 +193,11 @@ function merge(content, increment) {
 }
 
 function equivalent(a, b) {
+	// TODO: if problems arise from floating points, uncomment this check
+	// if (typeof a === 'number' && typeof b === 'number') {
+	// 	return Math.abs(a - b) < 0.00001; // XXX
+	// }
+
 	return a === b;
 }
 
