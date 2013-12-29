@@ -114,6 +114,7 @@ function Scheduler() {
 		self.pDivide = functionCallPropagator(requireAll(function (a, b) { return a / b }));
 		self.pSwitch = functionCallPropagator(function (control, input) { if (control) return input });
 		self.pConditional = functionCallPropagator(function (control, consequent, alternate) { if (control) { return consequent } else { return alternate } });
+		self.pGet = functionCallPropagator(requireAll(function (object, property) { return object[property] }));
 		// TODO: pConditionalRouter
 		// TODO: pDeposit
 		// TODO: pExamine

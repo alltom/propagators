@@ -314,6 +314,22 @@ test('divide', function (t) {
 	t.end();
 });
 
+test('objects', function (t) {
+	var scheduler, o = { a: 1, b: 2 }, object, property, value;
+
+	// pGet
+
+	scheduler = p.Scheduler();
+	object = scheduler.Cell({ a: 1, b: 2 });
+	property = scheduler.Cell("a");
+	value = scheduler.Cell();
+	scheduler.diagramApply(scheduler.pGet, [object, property, value]);
+	scheduler.run();
+	t.equal(value.content(), 1);
+
+	t.end();
+});
+
 test('expressions', function (t) {
 	var scheduler, w, x, y, z, answer;
 
