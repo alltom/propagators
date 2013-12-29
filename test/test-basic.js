@@ -364,24 +364,35 @@ test('expressions', function (t) {
 test('switch', function (t) {
 	var scheduler, control, input, output;
 
-	// pSwitch
+	// pSwitch: no control
 
 	scheduler = p.Scheduler();
 	control = scheduler.Cell();
 	input = scheduler.Cell(1);
 	output = scheduler.Cell();
 	scheduler.diagramApply(scheduler.pSwitch, [control, input, output]);
-
 	scheduler.run();
 	t.equal(output.content(), p.nothing);
 
-	control.addContent(false);
-	scheduler.run();
-	t.equal(output.content(), p.nothing);
+	// pSwitch: true
 
-	control.addContent(true);
+	scheduler = p.Scheduler();
+	control = scheduler.Cell(true);
+	input = scheduler.Cell(1);
+	output = scheduler.Cell();
+	scheduler.diagramApply(scheduler.pSwitch, [control, input, output]);
 	scheduler.run();
 	t.equal(output.content(), 1);
+
+	// pSwitch: false
+
+	scheduler = p.Scheduler();
+	control = scheduler.Cell(false);
+	input = scheduler.Cell(1);
+	output = scheduler.Cell();
+	scheduler.diagramApply(scheduler.pSwitch, [control, input, output]);
+	scheduler.run();
+	t.equal(output.content(), p.nothing);
 
 	t.end();
 });
@@ -389,21 +400,36 @@ test('switch', function (t) {
 test('conditional', function (t) {
 	var scheduler, control, consequent, alternate, output;
 
+	// no control
+
 	scheduler = p.Scheduler();
 	control = scheduler.Cell();
 	consequent = scheduler.Cell(1);
 	alternate = scheduler.Cell(2);
 	output = scheduler.Cell();
 	scheduler.diagramApply(scheduler.pConditional, [control, consequent, alternate, output]);
-
 	scheduler.run();
 	t.equal(output.content(), p.nothing);
 
-	control.addContent(true);
+	// consequent
+
+	scheduler = p.Scheduler();
+	control = scheduler.Cell(true);
+	consequent = scheduler.Cell(1);
+	alternate = scheduler.Cell(2);
+	output = scheduler.Cell();
+	scheduler.diagramApply(scheduler.pConditional, [control, consequent, alternate, output]);
 	scheduler.run();
 	t.equal(output.content(), 1);
 
-	control.addContent(false);
+	// alternate
+
+	scheduler = p.Scheduler();
+	control = scheduler.Cell(false);
+	consequent = scheduler.Cell(1);
+	alternate = scheduler.Cell(2);
+	output = scheduler.Cell();
+	scheduler.diagramApply(scheduler.pConditional, [control, consequent, alternate, output]);
 	scheduler.run();
 	t.equal(output.content(), 2);
 

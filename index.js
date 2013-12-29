@@ -1,6 +1,8 @@
 var _ = require("underscore");
+var util = require("util");
 
 var nothing = {};
+var contradiction = {};
 
 function Scheduler() {
 	var self = {}, scheduler = self;
@@ -45,7 +47,11 @@ function Scheduler() {
 		self.addContent = function (increment) {
 			var answer = merge(content, increment);
 
-			if (!equivalent(content, answer)) {
+			if (answer === contradiction) {
+				throw new ContradictionError(content, increment);
+			}
+
+			if (answer !== content) {
 				content = answer;
 				scheduler.alertPropagators(neighbors);
 			}
@@ -189,6 +195,16 @@ function merge(content, increment) {
 		return content;
 	}
 
+	// anything merged with a "contradiction" is a contradiction
+	if (content === contradiction || increment === contradiction) {
+		return contradiction;
+	}
+
+	// if the values are not equivalent, it is a contradiction
+	if (!equivalent(content, increment)) {
+		return contradiction;
+	}
+
 	return increment; // TODO
 }
 
@@ -201,5 +217,16 @@ function equivalent(a, b) {
 	return a === b;
 }
 
+// http://stackoverflow.com/questions/8458984/how-do-i-get-a-correct-backtrace-for-a-custom-error-class-in-nodejs
+function ContradictionError(oldValue, newValue) {
+	Error.call(this);
+	Error.captureStackTrace(this, this.constructor);
+	this.name = this.constructor.name;
+	this.message = oldValue + " contradicts " + newValue;
+}
+util.inherits(ContradictionError, Error);
+
 exports.Scheduler = Scheduler;
 exports.nothing = nothing;
+exports.contradiction = contradiction;
+exports.ContradictionError = ContradictionError;
